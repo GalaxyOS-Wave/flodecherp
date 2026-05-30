@@ -1,0 +1,272 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents an authenticated user profile in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Auth UID of the user." },
+        "email": { "type": "string", "description": "Email address of the user." },
+        "name": { "type": "string", "description": "Full name of the user." },
+        "role": { "type": "string", "enum": ["teacher", "student"], "description": "Role of the user in the academy platform." },
+        "academyId": { "type": "string", "description": "The associated academy ID (FAID) if teacher, or student's academy if applicable." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Registration timestamp." }
+      },
+      "required": ["uid", "email", "role", "name", "createdAt"]
+    },
+    "Academy": {
+      "title": "Academy",
+      "description": "An academy or training center registered on Flodech.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The globally unique Flodech Academy ID (FAID)." },
+        "ownerId": { "type": "string", "description": "UID of the teacher who owns this academy." },
+        "institutionName": { "type": "string", "description": "The formal name of the academy." },
+        "logoUrl": { "type": "string", "description": "Base64 or URL representation of the academy logo." },
+        "academyEmail": { "type": "string", "description": "Official email address." },
+        "phone": { "type": "string", "description": "Official contact phone number." },
+        "address": { "type": "string", "description": "Physical address." },
+        "academyType": { "type": "string", "enum": ["Coaching Institute", "Tuition Center", "Music Academy", "Dance Academy", "Training Center", "Other"], "description": "Category of teaching." },
+        "upiId": { "type": "string", "description": "UPI payment identifier." },
+        "upiQrCode": { "type": "string", "description": "Base64 encoded QR Code data for student scanning." },
+        "paymentInstructions": { "type": "string", "description": "Custom messages guiding student payments." },
+        "theme": { "type": "string", "description": "Chosen primary color theme or presentation configuration." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "institutionName", "academyEmail", "phone", "address", "academyType", "createdAt"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student details created and managed by an academy teacher.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Globally unique student ID (FLD-STU-XXXXXX)." },
+        "academyId": { "type": "string", "description": "FAID of the hosting academy." },
+        "name": { "type": "string", "description": "Full name of the student." },
+        "profilePhoto": { "type": "string", "description": "Base64 or URL avatar." },
+        "parentName": { "type": "string", "description": "Parent or guardian name." },
+        "parentPhone": { "type": "string", "description": "Contact phone for messages/billing." },
+        "email": { "type": "string", "description": "Email address of the student." },
+        "batch": { "type": "string", "description": "Assigned class cohort or batch name." },
+        "notes": { "type": "string", "description": "Confidential teacher annotations." },
+        "password": { "type": "string", "description": "Credentials for in-app sign-in." },
+        "disabled": { "type": "boolean", "description": "Flag to temporarily freeze user portal access." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "name", "parentName", "parentPhone", "email", "batch", "password", "disabled", "createdAt"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Daily attendance record for a specific batch on a particular date.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique record id standard: `${academyId}_${batch}_${date}`" },
+        "academyId": { "type": "string" },
+        "batch": { "type": "string" },
+        "date": { "type": "string", "description": "Date of track (YYYY-MM-DD)" },
+        "records": { "type": "object", "description": "Map mapping student ID to attendance value ('present', 'absent', 'late')" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "batch", "date", "records", "updatedAt"]
+    },
+    "Fee": {
+      "title": "Fee",
+      "description": "An invoice/charge generated for a student.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academyId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "amount": { "type": "number", "description": "Charge amount" },
+        "dueDate": { "type": "string", "description": "YYYY-MM-DD" },
+        "status": { "type": "string", "enum": ["pending", "paid"] },
+        "paidDate": { "type": "string" },
+        "receiptNumber": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "studentId", "studentName", "amount", "dueDate", "status", "createdAt"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "Academy bulletins shared by the teacher.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academyId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "isPinned": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "title", "content", "isPinned", "createdAt"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "Class calendar entry designating timetable.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academyId": { "type": "string" },
+        "batchName": { "type": "string" },
+        "className": { "type": "string" },
+        "dayOfWeek": { "type": "string" },
+        "startTime": { "type": "string", "description": "HH:MM" },
+        "endTime": { "type": "string", "description": "HH:MM" },
+        "teacherName": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "academyId", "batchName", "className", "dayOfWeek", "startTime", "endTime", "teacherName"]
+    },
+    "ChatThread": {
+      "title": "ChatThread",
+      "description": "Real-time communication channel container.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Matches studentId." },
+        "academyId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "unreadCountTeacher": { "type": "number" },
+        "unreadCountStudent": { "type": "number" }
+      },
+      "required": ["id", "academyId", "studentId", "studentName", "lastMessage", "lastMessageAt", "unreadCountTeacher", "unreadCountStudent"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Individual chat logs under a particular thread document.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["teacher", "student"] },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["id", "senderId", "senderRole", "content", "createdAt", "read"]
+    },
+    "Portfolio": {
+      "title": "Portfolio",
+      "description": "Automatic public portfolio details linked to a student profile.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Identified by studentId." },
+        "academyId": { "type": "string" },
+        "isVisible": { "type": "boolean", "description": "Controls if public route shows contents." },
+        "achievements": { "type": "array" },
+        "certificates": { "type": "array" },
+        "gallery": { "type": "array" },
+        "progressReports": { "type": "array" },
+        "teacherFeedback": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "isVisible", "achievements", "certificates", "gallery", "progressReports", "teacherFeedback", "updatedAt"]
+    },
+    "Admission": {
+      "title": "Admission",
+      "description": "Admission request details submitted by prospective student/parent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academyId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "parentName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "age": { "type": "number" },
+        "interestedCourse": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "studentName", "parentName", "phoneNumber", "email", "age", "interestedCourse", "message", "status", "createdAt"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "General professional inquiry logs.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academyId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "name", "email", "phoneNumber", "message", "status", "createdAt"]
+    },
+    "Batch": {
+      "title": "Batch",
+      "description": "Custom student batch or class cohort.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique batch ID." },
+        "academyId": { "type": "string", "description": "Academy ID." },
+        "name": { "type": "string", "description": "The custom name of this batch." },
+        "description": { "type": "string", "description": "Optional description or class timing detail." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academyId", "name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Saves primary credential connections."
+    },
+    "/academies/{academyId}": {
+      "schema": "Academy",
+      "description": "Saves primary academy operations metadata."
+    },
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Saves credentials and data for academy students."
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Saves daily attendance rosters per batch."
+    },
+    "/fees/{feeId}": {
+      "schema": "Fee",
+      "description": "Tracks invoices and payments due to the academy."
+    },
+    "/notices/{noticeId}": {
+      "schema": "Notice",
+      "description": "Academy notices and bulletins."
+    },
+    "/schedules/{scheduleId}": {
+      "schema": "Schedule",
+      "description": "Weekly timetables."
+    },
+    "/chats/{chatId}": {
+      "schema": "ChatThread",
+      "description": "Individual 1-to-1 conversation channels."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat log logs in each specific channel."
+    },
+    "/portfolios/{portfolioId}": {
+      "schema": "Portfolio",
+      "description": "Public academic achievements and progress display details."
+    },
+    "/admissions/{admissionId}": {
+      "schema": "Admission",
+      "description": "Inward admission pipelines."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Public question submissions for communication pipelines."
+    },
+    "/batches/{batchId}": {
+      "schema": "Batch",
+      "description": "Custom student batches or cohort definitions."
+    }
+  }
+}

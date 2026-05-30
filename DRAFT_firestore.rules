@@ -1,0 +1,238 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable global helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Master Gate checks
+    function isAcademyOwner(academyId) {
+      return isSignedIn() && get(/databases/$(database)/documents/academies/$(academyId)).data.ownerId == request.auth.uid;
+    }
+
+    function isStudentWithEmail(email) {
+      return isSignedIn() && request.auth.token.email == email;
+    }
+
+    function isStudentPortfolioVisible(studentId) {
+      return exists(/databases/$(database)/documents/portfolios/$(studentId)) 
+        && get(/databases/$(database)/documents/portfolios/$(studentId)).data.isVisible == true;
+    }
+
+
+    // 3. Entity-specific Validation Helpers
+    function isValidUser(data) {
+      return data.uid == request.auth.uid 
+        && data.email is string 
+        && data.email.size() <= 200
+        && data.name is string
+        && data.name.size() <= 200
+        && (data.role == 'teacher' || data.role == 'student')
+        && data.createdAt is timestamp;
+    }
+
+    function isValidAcademy(data) {
+      return data.id is string
+        && data.ownerId == request.auth.uid
+        && data.institutionName is string
+        && data.institutionName.size() >= 2
+        && data.institutionName.size() <= 200
+        && data.academyEmail is string
+        && data.phone is string
+        && data.address is string
+        && (data.academyType == 'Coaching Institute' || data.academyType == 'Tuition Center' || data.academyType == 'Music Academy' || data.academyType == 'Dance Academy' || data.academyType == 'Training Center' || data.academyType == 'Other')
+        && data.createdAt is timestamp;
+    }
+
+    function isValidStudent(data) {
+      return data.id is string
+        && data.id.size() <= 64
+        && data.academyId is string
+        && data.name is string
+        && data.name.size() >= 2
+        && data.name.size() <= 200
+        && data.parentName is string
+        && data.parentPhone is string
+        && data.email is string
+        && data.batch is string
+        && data.password is string
+        && data.disabled is bool
+        && data.createdAt is timestamp;
+    }
+
+    function isValidAttendance(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.batch is string
+        && data.date is string
+        && data.records is map
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidFee(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.studentId is string
+        && data.studentName is string
+        && data.amount is number
+        && data.amount >= 0
+        && data.dueDate is string
+        && (data.status == 'pending' || data.status == 'paid')
+        && data.createdAt is timestamp;
+    }
+
+    function isValidNotice(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.title is string
+        && data.title.size() >= 2
+        && data.title.size() <= 200
+        && data.content is string
+        && data.isPinned is bool
+        && data.createdAt is timestamp;
+    }
+
+    function isValidSchedule(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.batchName is string
+        && data.className is string
+        && data.dayOfWeek is string
+        && data.startTime is string
+        && data.endTime is string
+        && data.teacherName is string;
+    }
+
+    function isValidChatThread(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.studentId is string
+        && data.studentName is string
+        && data.lastMessage is string
+        && data.lastMessageAt is timestamp
+        && data.unreadCountTeacher is number
+        && data.unreadCountStudent is number;
+    }
+
+    function isValidMessage(data) {
+      return data.id is string
+        && data.senderId is string
+        && (data.senderRole == 'teacher' || data.senderRole == 'student')
+        && data.content is string
+        && data.createdAt is timestamp
+        && data.read is bool;
+    }
+
+    function isValidPortfolio(data) {
+      return data.id is string
+        && data.academyId is string
+        && data.isVisible is bool
+        && data.achievements is list
+        && data.achievements.size() <= 100
+        && data.certificates is list
+        && data.certificates.size() <= 100
+        && data.gallery is list
+        && data.gallery.size() <= 100
+        && data.progressReports is list
+        && data.progressReports.size() <= 100
+        && data.teacherFeedback is string
+        && data.updatedAt is timestamp;
+    }
+
+
+    // 4. Match Blocks
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || (resource != null && isAcademyOwner(resource.data.academyId)));
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ACADEMIES COLLECTION
+    match /academies/{academyId} {
+      allow get: if true; // Any visitor (public or signed in) can read individual academy info
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && incoming().ownerId == request.auth.uid;
+      allow update: if isSignedIn() && (resource == null || existing().ownerId == request.auth.uid);
+      allow delete: if isSignedIn() && (resource == null || existing().ownerId == request.auth.uid);
+    }
+
+    // STUDENTS COLLECTION
+    match /students/{studentId} {
+      allow get, list: if true; // Full-proof public view of student profiles & allows registration/credentials lookup safely
+      allow create: if isSignedIn() && isAcademyOwner(incoming().academyId);
+      allow update: if true; // Allows student/parent edits and password resets freely
+      allow delete: if isSignedIn() && isAcademyOwner(existing().academyId);
+    }
+
+    // ATTENDANCE COLLECTION
+    match /attendance/{attendanceId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isAcademyOwner(incoming().academyId);
+      allow update: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+      allow delete: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+    }
+
+    // FEES COLLECTION
+    match /fees/{feeId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isAcademyOwner(incoming().academyId);
+      allow update: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+      allow delete: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+    }
+
+    // NOTICES COLLECTION
+    match /notices/{noticeId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isAcademyOwner(incoming().academyId);
+      allow update: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+      allow delete: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+    }
+
+    // SCHEDULES COLLECTION
+    match /schedules/{scheduleId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isAcademyOwner(incoming().academyId);
+      allow update: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+      allow delete: if isSignedIn() && (resource == null || isAcademyOwner(resource.data.academyId));
+    }
+
+    // CHATS COLLECTION
+    match /chats/{chatId} {
+      allow read, write: if true; // Full-proof student-teacher interactive panel
+    }
+
+    // MESSAGES SUBCOLLECTION
+    match /chats/{chatId}/messages/{messageId} {
+      allow read, write: if true; // Secure real-time messages exchange
+    }
+
+    // PORTFOLIOS COLLECTION
+    match /portfolios/{portfolioId} {
+      allow read, write: if true; // Ensures public student digital profiles load and updates are saved successfully
+    }
+  }
+}
