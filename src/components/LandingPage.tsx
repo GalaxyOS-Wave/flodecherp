@@ -102,17 +102,17 @@ export default function LandingPage({ onGetStarted, onSignIn }: LandingPageProps
     {
       quote: "Flodech replaced three different apps for us. Our parents love the portfolios, and marking attendance takes 5 seconds now.",
       author: "Sneha Mehta",
-      role: "Director, Pulse Dance Academy"
+      role: "Vidyarthii Academy , PUNE"
     },
     {
       quote: "No more scrolling WhatsApp groups searching for payment receipts. The UPI QR features and fee status boards are absolute lifesavers.",
       author: "Rajesh Kumar",
-      role: "Lead Physicist, Zenith Coaching Center"
+      role: "Gurukul  , DELHI"
     },
     {
       quote: "The students feel incredibly motivated with their portfolio galleries. It highlights our academy as a truly technology-driven learning center.",
-      author: "Liam Harrison",
-      role: "Head of Music, Resonance Guitar Studio"
+      author: "Arun Bhatia",
+      role: "Bhatia Academy , Bihar"
     }
   ];
 
@@ -142,7 +142,7 @@ export default function LandingPage({ onGetStarted, onSignIn }: LandingPageProps
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img
-              src={logoImg}
+              src=
               alt="Flodech Logo"
               className="w-9 h-9 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
               referrerPolicy="no-referrer"
@@ -380,7 +380,7 @@ export default function LandingPage({ onGetStarted, onSignIn }: LandingPageProps
           </div>
           
           <p className="text-xs text-slate-500 text-center">
-            &copy; {new Date().getFullYear()} Flodech Academy Inc. All rights reserved. "Everything for Your Academy in One Place."
+            &copy; {new Date().getFullYear()} Flodech Technologies. All rights reserved. "Everything for Your Academy in One Place."
           </p>
 
           <div className="flex items-center gap-6 text-xs text-slate-500">
