@@ -28,6 +28,7 @@ import {
   CalendarDays, 
   TrendingUp, 
   X,
+  Menu,
   UserCheck,
   AlertCircle,
   Shield,
@@ -84,6 +85,7 @@ interface TeacherDashboardProps {
 
 export default function TeacherDashboard({ academyId, onLogout }: TeacherDashboardProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'batches' | 'attendance' | 'fees' | 'notices' | 'schedule' | 'portfolio' | 'chat' | 'reports' | 'settings' | 'public-profile'>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [academy, setAcademy] = useState<Academy | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -1013,63 +1015,77 @@ export default function TeacherDashboard({ academyId, onLogout }: TeacherDashboa
       
       {/* SIDE NAVIGATION DRAWER */}
       <aside className="w-full md:w-64 bg-slate-950 text-white flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-900 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="p-3 border-b border-slate-900 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <img
               src={logoImg}
               alt="Flodech Logo"
-              className="w-8 h-8 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
+              className="w-6 h-6 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
               referrerPolicy="no-referrer"
             />
-            <span className="text-white font-extrabold text-lg tracking-tight">Flodech</span>
+            <span className="text-white font-extrabold text-sm tracking-tight">Flodech</span>
           </div>
 
-          <span className="text-[9px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-mono">
-            Direct
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">
+              Direct
+            </span>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-1 text-white">
+              {isMobileMenuOpen ? <X className="w-5 h-5"/> : <Menu className="w-5 h-5"/>}
+            </button>
+          </div>
         </div>
 
         {/* Short info display */}
-        <div className="p-4 bg-slate-900/40 border-b border-slate-900 flex items-center gap-3">
+        <div className="p-2 bg-slate-900/40 border-b border-slate-900 flex items-center gap-2">
           {academy && (
             <>
               <img 
                 src={setInstLogo || academy.logoUrl} 
                 alt="Logo" 
-                className="w-10 h-10 object-contain rounded-xl bg-white border border-slate-800 p-0.5" 
+                className="w-8 h-8 object-contain rounded-lg bg-white border border-slate-800 p-0.5" 
               />
-              <div className="text-sm truncate">
+              <div className="text-[10px] truncate">
                 <span className="font-extrabold text-slate-200 block truncate leading-tight">{academy.institutionName}</span>
-                <span className="text-slate-500 font-mono text-[10px] sm:text-xs">ID: {academy.id}</span>
+                <span className="text-slate-500 font-mono text-[9px]">ID: {academy.id}</span>
               </div>
             </>
           )}
         </div>
 
-        <nav className="flex-grow p-4 space-y-1.5 overflow-y-auto">
+        <nav className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col flex-grow p-4 space-y-1.5 overflow-y-auto`}>
           <button
             id="teach-tab-dashboard"
-            onClick={() => setActiveTab('dashboard')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'dashboard' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('dashboard');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'dashboard' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <Sliders className="w-4 h-4" /> Overview Dashboard
+            <Sliders className="w-4 h-4" /> <span>Dashboard</span>
           </button>
 
           <button
             id="teach-tab-students"
-            onClick={() => setActiveTab('students')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between ${activeTab === 'students' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('students');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'students' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <span className="flex items-center gap-3"><Users className="w-4 h-4" /> Students Directory</span>
+            <span className="flex items-center gap-3"><Users className="w-4 h-4" /> <span className="truncate">Students</span></span>
             <span className="text-[10px] bg-slate-900 px-2 py-0.5 rounded-full font-mono">{students.length}</span>
           </button>
 
           <button
             id="teach-tab-batches"
-            onClick={() => setActiveTab('batches')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between ${activeTab === 'batches' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('batches');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'batches' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <span className="flex items-center gap-3"><Layers className="w-4 h-4" /> Batches Manager</span>
+            <span className="flex items-center gap-3"><Layers className="w-4 h-4" /> <span className="truncate">Batches</span></span>
             <span className="text-[10px] bg-slate-900 px-2 py-0.5 rounded-full font-mono">{batches.length}</span>
           </button>
 
@@ -1077,103 +1093,120 @@ export default function TeacherDashboard({ academyId, onLogout }: TeacherDashboa
             id="teach-tab-attendance"
             onClick={() => {
               setActiveTab('attendance');
-              // Initialize checkbox records from directory students
+              setIsMobileMenuOpen(false);
               const defaults: { [id: string]: 'present' | 'absent' | 'late' } = {};
               students.forEach(s => { defaults[s.id] = 'present'; });
               setAttendanceRecords(defaults);
             }}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'attendance' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'attendance' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <CheckCircle2 className="w-4 h-4" /> Attendance Module
+            <CheckCircle2 className="w-4 h-4" /> <span className="truncate">Attendance</span>
           </button>
 
           <button
             id="teach-tab-fees"
-            onClick={() => setActiveTab('fees')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between ${activeTab === 'fees' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('fees');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'fees' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <span className="flex items-center gap-3"><CreditCard className="w-4 h-4" /> Fee Management</span>
+            <span className="flex items-center gap-3"><CreditCard className="w-4 h-4" /> <span className="truncate">Fees</span></span>
             {getAcademySumPendingFees() > 0 && <span className="text-[10px] bg-red-600 font-bold px-1.5 py-0.5 rounded text-white font-mono">${getAcademySumPendingFees()}</span>}
           </button>
 
           <button
             id="teach-tab-notices"
-            onClick={() => setActiveTab('notices')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'notices' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('notices');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'notices' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <Bell className="w-4 h-4" /> Notice Bulletins
+            <Bell className="w-4 h-4" /> <span className="truncate">Notices</span>
           </button>
 
           <button
             id="teach-tab-schedule"
-            onClick={() => setActiveTab('schedule')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'schedule' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('schedule');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'schedule' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <Clock className="w-4 h-4" /> Timetable Scheduler
+            <Clock className="w-4 h-4" /> <span className="truncate">Schedule</span>
           </button>
 
           <button
             id="teach-tab-portfolio"
             onClick={() => {
               setActiveTab('portfolio');
+              setIsMobileMenuOpen(false);
               if (students.length > 0 && !selectedPortfolioId) {
                 handleSelectPortfolioStudent(students[0].id);
               }
             }}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <Award className="w-4 h-4" /> Student Portfolios
+            <Award className="w-4 h-4" /> <span className="truncate">Portfolios</span>
           </button>
 
           <button
             id="teach-tab-chat"
             onClick={() => {
               setActiveTab('chat');
+              setIsMobileMenuOpen(false);
               if (chatThreads.length > 0 && !selectedStudentChatId) {
                 setSelectedStudentChatId(chatThreads[0].studentId);
               }
             }}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between ${activeTab === 'chat' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'chat' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <span className="flex items-center gap-3"><MessageSquare className="w-4 h-4" /> Messenger Desk</span>
+            <span className="flex items-center gap-3"><MessageSquare className="w-4 h-4" /> <span className="truncate">Messenger</span></span>
             {chatThreads.some(t => t.unreadCountTeacher > 0) && <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping shrink-0" />}
           </button>
 
           <button
             id="teach-tab-reports"
-            onClick={() => setActiveTab('reports')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'reports' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('reports');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'reports' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <FileText className="w-4 h-4" /> Reports & PDF Tool
+            <FileText className="w-4 h-4" /> <span className="truncate">Reports</span>
           </button>
 
           <button
             id="teach-tab-public-profile"
-            onClick={() => setActiveTab('public-profile')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between ${activeTab === 'public-profile' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('public-profile');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'public-profile' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <span className="flex items-center gap-3"><Globe className="w-4 h-4" /> Public Website</span>
+            <span className="flex items-center gap-3"><Globe className="w-4 h-4" /> <span className="truncate">Website</span></span>
             <span className="text-[9px] uppercase font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-1.5 py-0.5 rounded shrink-0">LIVE</span>
           </button>
 
           <button
             id="teach-tab-settings"
-            onClick={() => setActiveTab('settings')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 ${activeTab === 'settings' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+            onClick={() => {
+              setActiveTab('settings');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-start px-4 py-3 rounded-xl text-sm font-semibold gap-3 ${activeTab === 'settings' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
           >
-            <Settings className="w-4 h-4" /> Agency Settings
+            <Settings className="w-4 h-4" /> <span className="truncate">Settings</span>
           </button>
-        </nav>
-
-        <div className="p-4 border-t border-slate-900">
           <button 
             id="teach-logout-btn"
             onClick={onLogout}
-            className="w-full text-slate-400 hover:text-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider bg-slate-900 hover:bg-slate-850 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full text-slate-400 hover:text-white px-4 py-3 text-sm font-semibold flex items-center gap-3 hover:bg-slate-900 rounded-xl transition-colors cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" /> Disconnect Session
+            <LogOut className="w-4 h-4" /> Disconnect Session
           </button>
-        </div>
+        </nav>
       </aside>
 
       {/* CORE CONTENT WORKSPACE */}
