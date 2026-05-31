@@ -25,7 +25,9 @@ import {
   Building,
   Shield,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Menu,
+  X
 } from 'lucide-react';
 import { 
   doc, 
@@ -52,6 +54,7 @@ interface StudentDashboardProps {
 
 export default function StudentDashboard({ studentId, studentEmail, onLogout }: StudentDashboardProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'notices' | 'schedule' | 'attendance' | 'fees' | 'portfolio' | 'chat'>('profile');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [student, setStudent] = useState<Student | null>(null);
   const [academyName, setAcademyName] = useState('Flodech Academy');
   const [academyUpiId, setAcademyUpiId] = useState('');
@@ -325,74 +328,98 @@ export default function StudentDashboard({ studentId, studentEmail, onLogout }: 
       
       {/* SIDEBAR NAVIGATION PANEL */}
       <aside className="w-full md:w-64 bg-slate-900 text-white flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="p-3 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <img
               src={logoImg}
               alt="Flodech Logo"
-              className="w-8 h-8 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
+              className="w-6 h-6 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
               referrerPolicy="no-referrer"
             />
-            <span className="text-white font-extrabold text-lg tracking-tight">Flodech</span>
+            <span className="text-white font-extrabold text-sm tracking-tight">Flodech</span>
           </div>
 
-          <span className="text-[9px] uppercase font-bold tracking-widest text-orange-400 bg-orange-500/10 border border-orange-500/10 px-2 py-0.5 rounded-full font-mono">
-            STU-PORT
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] uppercase font-bold tracking-widest text-orange-400 bg-orange-500/10 border border-orange-500/10 px-2 py-0.5 rounded-full font-mono">
+              STU-PORT
+            </span>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-1 text-white">
+              {isMobileMenuOpen ? <X className="w-5 h-5"/> : <Menu className="w-5 h-5"/>}
+            </button>
+          </div>
         </div>
 
         {/* Short info display */}
-        <div className="p-4 bg-slate-950/40 border-b border-slate-800/80 flex items-center gap-3">
-          <img 
-            src={student.profilePhoto || `https://api.dicebear.com/7.x/initials/svg?seed=${student.name}`} 
-            alt={student.name} 
-            className="w-10 h-10 rounded-xl object-contain bg-slate-900 border border-slate-800 p-0.5" 
-          />
-          <div className="text-sm truncate">
-            <span className="font-extrabold text-white block truncate leading-tight">{student.name}</span>
-            <span className="text-slate-500 text-xs font-mono">{student.id}</span>
-          </div>
+        <div className="p-2 bg-slate-950/40 border-b border-slate-800/80 flex items-center gap-2">
+          {student && (
+            <>
+              <img 
+                src={student.profilePhoto || `https://api.dicebear.com/7.x/initials/svg?seed=${student.name}`} 
+                alt={student.name} 
+                className="w-8 h-8 rounded-lg object-contain bg-slate-900 border border-slate-800 p-0.5" 
+              />
+              <div className="text-[10px] truncate">
+                <span className="font-extrabold text-white block truncate leading-tight">{student.name}</span>
+                <span className="text-slate-500 text-[9px] font-mono">{student.id}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <nav className="flex-grow p-4 space-y-1.5 overflow-y-auto">
+        <nav className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col flex-grow p-4 space-y-1.5 overflow-y-auto`}>
           <button
             id="tab-profile-btn"
-            onClick={() => setActiveTab('profile')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all ${activeTab === 'profile' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('profile');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'profile' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
             <User className="w-4 h-4" /> Profile Info
           </button>
           
           <button
             id="tab-notices-btn"
-            onClick={() => setActiveTab('notices')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-all ${activeTab === 'notices' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('notices');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'notices' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
-            <span className="flex items-center gap-3"><Bell className="w-4 h-4" /> Core Notices</span>
+            <span className="flex items-center gap-3"><Bell className="w-4 h-4" /> Notices</span>
             {notices.length > 0 && <span className="text-[10px] bg-orange-600 px-2 py-0.5 rounded-full text-white font-mono">{notices.length}</span>}
           </button>
 
           <button
             id="tab-schedule-btn"
-            onClick={() => setActiveTab('schedule')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all ${activeTab === 'schedule' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('schedule');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'schedule' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
-            <Calendar className="w-4 h-4" /> Weekly Timetable
+            <Calendar className="w-4 h-4" /> Schedule
           </button>
 
           <button
             id="tab-attendance-btn"
-            onClick={() => setActiveTab('attendance')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-all ${activeTab === 'attendance' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('attendance');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'attendance' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
-            <span className="flex items-center gap-3"><CalendarCheck className="w-4 h-4" /> Attendance Rates</span>
+            <span className="flex items-center gap-3"><CalendarCheck className="w-4 h-4" /> Attendance</span>
             <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-orange-400 font-mono font-bold">{calculateAttendanceRate()}%</span>
           </button>
 
           <button
             id="tab-fees-btn"
-            onClick={() => setActiveTab('fees')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-all ${activeTab === 'fees' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('fees');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'fees' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
             <span className="flex items-center gap-3"><DollarSign className="w-4 h-4" /> Tuition & Fees</span>
             {fees.some(f => f.status === 'pending') && <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />}
@@ -400,31 +427,35 @@ export default function StudentDashboard({ studentId, studentEmail, onLogout }: 
 
           <button
             id="tab-portfolio-btn"
-            onClick={() => setActiveTab('portfolio')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('portfolio');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'portfolio' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
-            <span className="flex items-center gap-3"><Award className="w-4 h-4" /> My Digital Portfolio</span>
+            <span className="flex items-center gap-3"><Award className="w-4 h-4" /> Portfolio</span>
             <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
           </button>
 
           <button
             id="tab-chat-btn"
-            onClick={() => setActiveTab('chat')}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all ${activeTab === 'chat' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
+            onClick={() => {
+              setActiveTab('chat');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold gap-3 transition-all ${activeTab === 'chat' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800/45'}`}
           >
-            <MessageSquare className="w-4 h-4" /> Faculty Chat Room
+            <MessageSquare className="w-4 h-4" /> Chat
           </button>
-        </nav>
 
-        <div className="p-4 border-t border-slate-800">
           <button 
             id="student-logout-btn"
             onClick={onLogout}
-            className="w-full text-slate-400 hover:text-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider bg-slate-850 hover:bg-slate-800 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full text-slate-400 hover:text-white px-4 py-3 text-sm font-semibold flex items-center gap-3 hover:bg-slate-800/45 rounded-xl transition-colors cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" /> Disconnect Session
+            <LogOut className="w-4 h-4" /> Disconnect Session
           </button>
-        </div>
+        </nav>
       </aside>
 
       {/* WORKSPACE DETAIL BLOCK */}
