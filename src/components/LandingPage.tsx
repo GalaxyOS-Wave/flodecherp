@@ -142,7 +142,7 @@ export default function LandingPage({ onGetStarted, onSignIn }: LandingPageProps
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img
-              src=
+              src='../assets/images/logotech_icon_1780152227001.png'
               alt="Flodech Logo"
               className="w-9 h-9 rounded-lg object-cover bg-orange-500 select-none shadow-sm"
               referrerPolicy="no-referrer"
